@@ -1,0 +1,35 @@
+# CI = Integração Contínua.
+# A cada push (em qualquer branch) ou pull request para a main, o GitHub cria
+# uma máquina Linux limpa, baixa o repositório e roda os testes da pasta tests/.
+# Se algum teste falhar, o commit fica com um X vermelho na aba "Actions".
+
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:        # permite rodar na mão pela aba Actions
+
+jobs:
+  testes:
+    name: Testes (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Entre aspas: sem elas o YAML lê 3.10 como o número 3.1
+        python: ["3.10", "3.12"]
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      - name: Instalar o Python ${{ matrix.python }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Rodar os testes
+        run: python -m unittest discover -s tests -v
